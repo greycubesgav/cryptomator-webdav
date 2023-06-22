@@ -2,7 +2,7 @@
 
 JAR_LOCATION='/usr/local/bin/cryptomator-cli.jar'
 CRYPTOMATOR_PASSFILE_LOC='/tmp/vault_pass'
-CRYPTOMATOR_BIND='127.0.0.1'
+CRYPTOMATOR_BIND='0.0.0.0'
 
 # Write the password to a tmp file to prevent it appearing in the process list
 if [[ ! -f "${CRYPTOMATOR_PASSFILE_LOC}" ]]; then
