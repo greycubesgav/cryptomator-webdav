@@ -1,4 +1,4 @@
-FROM openjdk:17-slim
+FROM eclipse-temurin:17.0.7_7-jre-ubi9-minimal
 
 ENV CRYPTOMATOR_VAULT_NAME demoVault
 ENV CRYPTOMATOR_SRC_PATH /path/to/cryptomator/vault/files
