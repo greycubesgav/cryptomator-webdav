@@ -1,0 +1,21 @@
+services:
+  cryptomator-webdav: &base
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      CRYPTOMATOR_VAULT_SRC_PATH: "${CRYPTOMATOR_VAULT_SRC_PATH}"
+      CRYPTOMATOR_VAULT_NAME: "${CRYPTOMATOR_VAULT_NAME}"
+      CRYPTOMATOR_VAULT_PASS: "${CRYPTOMATOR_VAULT_PASS}"
+      CRYPTOMATOR_PORT: "${CRYPTOMATOR_PORT}"
+      CRYPTOMATOR_VAULT_CONTAINER_PATH: "${CRYPTOMATOR_VAULT_CONTAINER_PATH}"
+    ports:
+      - "127.0.0.1:${CRYPTOMATOR_PORT}:${CRYPTOMATOR_PORT}/tcp"
+    volumes:
+      - "${CRYPTOMATOR_VAULT_SRC_PATH}:${CRYPTOMATOR_VAULT_CONTAINER_PATH}"
+  cryptomator-webdav-dev:
+      <<: *base
+      entrypoint: /bin/bash
+  cryptomator-webdav-env:
+      <<: *base
+      entrypoint: /bin/bash -c 'export | grep CRYPTOMATOR_'
