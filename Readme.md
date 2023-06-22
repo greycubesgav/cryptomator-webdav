@@ -66,4 +66,4 @@ To check what environment variables are getting set in the container:
 * Run `docker-compose run cryptomator-webdav-env`
 
 ### To run the docker container and connect to a local shell
-* Run `docker-compose run cryptomator-webdav-dev`
+* Run `docker-compose run --service-ports cryptomator-webdav-dev`
