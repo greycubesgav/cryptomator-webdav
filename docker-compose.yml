@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: greycubesgav/cryptomator-cli-docker
+    image: greycubesgav/cryptomator-webdav
     user: 1000:1000
     environment:
       CRYPTOMATOR_VAULT_SRC_PATH: "${CRYPTOMATOR_VAULT_SRC_PATH}"
