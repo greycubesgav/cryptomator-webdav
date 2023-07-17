@@ -3,16 +3,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: greycubesgav/cryptomator-cli-docker
+    user: 1000:1000
     environment:
       CRYPTOMATOR_VAULT_SRC_PATH: "${CRYPTOMATOR_VAULT_SRC_PATH}"
       CRYPTOMATOR_VAULT_NAME: "${CRYPTOMATOR_VAULT_NAME}"
       CRYPTOMATOR_VAULT_PASS: "${CRYPTOMATOR_VAULT_PASS}"
       CRYPTOMATOR_PORT: "${CRYPTOMATOR_PORT}"
-      CRYPTOMATOR_VAULT_CONTAINER_PATH: "${CRYPTOMATOR_VAULT_CONTAINER_PATH}"
     ports:
-      - "127.0.0.1:${CRYPTOMATOR_PORT}:${CRYPTOMATOR_PORT}/tcp"
+      - "0.0.0.0:${CRYPTOMATOR_PORT}:${CRYPTOMATOR_PORT}/tcp"
     volumes:
-      - "${CRYPTOMATOR_VAULT_SRC_PATH}:${CRYPTOMATOR_VAULT_CONTAINER_PATH}"
+      - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault"
   cryptomator-webdav-dev:
       <<: *base
       entrypoint: /bin/bash
