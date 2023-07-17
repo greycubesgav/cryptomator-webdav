@@ -9,7 +9,3 @@ CRYPTOMATOR_VAULT_PASS='password'
 
 # CRYPTOMATOR_PORT: The port the webdav share will be shared on
 CRYPTOMATOR_PORT=18081
-
-# CRYPTOMATOR_VAULT_CONTAINER_PATH: Doesn't need changed!
-# The path where the local encrypted files will be mounted by docker-compose within the container.
-CRYPTOMATOR_VAULT_CONTAINER_PATH=/vault
