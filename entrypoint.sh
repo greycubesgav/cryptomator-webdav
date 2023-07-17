@@ -13,6 +13,6 @@ fi
 
 echo "Starting cryptomator-cli, will listen on: http://${CRYPTOMATOR_BIND}:${CRYPTOMATOR_PORT}/${CRYPTOMATOR_VAULT_NAME}"
 echo "------------------------------"
-exec java -jar "${JAR_LOCATION}" --bind="${CRYPTOMATOR_BIND}" --port="${CRYPTOMATOR_PORT}" \
+exec java -XX:-UsePerfData -jar "${JAR_LOCATION}" --bind="${CRYPTOMATOR_BIND}" --port="${CRYPTOMATOR_PORT}" \
     --vault "${CRYPTOMATOR_VAULT_NAME}=/vault"  \
     --passwordfile "${CRYPTOMATOR_VAULT_NAME}=${CRYPTOMATOR_PASSFILE_LOC}"
