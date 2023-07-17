@@ -11,7 +11,7 @@ services:
       CRYPTOMATOR_VAULT_PASS: "${CRYPTOMATOR_VAULT_PASS}"
       CRYPTOMATOR_PORT: "${CRYPTOMATOR_PORT}"
     ports:
-      - "0.0.0.0:${CRYPTOMATOR_PORT}:${CRYPTOMATOR_PORT}/tcp"
+      - "127.0.0.1:${CRYPTOMATOR_PORT}:${CRYPTOMATOR_PORT}/tcp"
     volumes:
       - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault"
   cryptomator-webdav-dev:
