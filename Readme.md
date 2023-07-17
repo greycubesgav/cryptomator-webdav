@@ -6,23 +6,22 @@ The Cryptomator-cli application shares a local Cryptmator vault over an (unencry
 
 :warning: As of June 2023, Cryptomator states the cli application is still in an early stage and not ready for production use. We recommend using it only for testing and evaluation purposes.
 
-## Rebuild Intructions
+## Docker Image Rebuild Intructions
 
 * Clone the repo
+* Copy the `dot_env_sample` file to `.env`
+* * `cp dot_env_sample .env`
 * Build with docker-compose
+* * `docker-compose build cryptomator-webdav`
 
-```bash
-docker-compose build cryptomator-webdav
-```
 
 ## Usage Instructions
 
 * Copy the `dot_env_sample` file to `.env`
+* * `cp dot_env_sample .env`
 * Update `.env` file with your local settings
-* Run `docker-compose up cryptomator-webdav`
-```bash
-docker-compose up cryptomator-webdav
-```
+* Run
+* * `docker-compose up cryptomator-webdav`
 * The vault will be accessible on the docker host machine on the port and folder specified in the .env file
 * By default this would be available at http://dockerhost:18081/demoVault, with no username or password on the webdav share
 
@@ -40,10 +39,6 @@ CRYPTOMATOR_VAULT_PASS='password'
 
 # CRYPTOMATOR_PORT: The port the webdav share will be shared on
 CRYPTOMATOR_PORT=18081
-
-# CRYPTOMATOR_VAULT_CONTAINER_PATH: Doesn't need changed!
-# The path where the local encrypted files will be mounted by docker-compose within the container.
-CRYPTOMATOR_VAULT_CONTAINER_PATH=/vault
 ```
 
 ## Upgrade cryptomator-cli instructions
