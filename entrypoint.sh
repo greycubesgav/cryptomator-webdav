@@ -11,6 +11,13 @@ if [[ ! -f "${CRYPTOMATOR_PASSFILE_LOC}" ]]; then
     chmod 0400 "${CRYPTOMATOR_PASSFILE_LOC}"
 fi
 
+# Show the current UID and GID of the running process
+echo "Current UIDs/GIDs:"
+cat /proc/self/status | grep '[UG]id'
+# Set the umask to ensure files are not created world readable
+umask 0026
+echo "Current umask: $(umask)"
+
 echo "Starting cryptomator-cli, will listen on: http://${CRYPTOMATOR_BIND}:${CRYPTOMATOR_PORT}/${CRYPTOMATOR_VAULT_NAME}"
 echo "------------------------------"
 exec java -XX:-UsePerfData -jar "${JAR_LOCATION}" --bind="${CRYPTOMATOR_BIND}" --port="${CRYPTOMATOR_PORT}" \
