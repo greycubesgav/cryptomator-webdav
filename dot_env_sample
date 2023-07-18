@@ -2,7 +2,7 @@
 CRYPTOMATOR_VAULT_SRC_PATH='/location/of/local/cryptomator/vaule/files'
 
 # CRYPTOMATOR_VAULT_NAME: The path that will be added to the webdav share e.g. demovault would be shared at http://localhost:18081/demovault
-CRYPTOMATOR_VAULT_NAME=demoVault
+CRYPTOMATOR_VAULT_NAME=vault
 
 # CRYPTOMATOR_VAULT_PASS: The cryptomator password to unencrypt the vault
 CRYPTOMATOR_VAULT_PASS='password'

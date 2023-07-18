@@ -1,6 +1,6 @@
 FROM eclipse-temurin:17.0.7_7-jre-ubi9-minimal
 
-ENV CRYPTOMATOR_VAULT_NAME='demoVault'
+ENV CRYPTOMATOR_VAULT_NAME='vault'
 ENV CRYPTOMATOR_SRC_PATH='/path/to/cryptomator/vault/files'
 ENV CRYPTOMATOR_VAULT_PASS='password'
 ENV CRYPTOMATOR_PORT='18081'
