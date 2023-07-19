@@ -26,6 +26,10 @@ services:
     entrypoint: /bin/bash
   cryptomator-webdav-dev-passfile:
     <<: *basepassfile
+    volumes:
+      - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault"
+      - "${CRYPTOMATOR_VAULT_PASSFILE}:/vault.pass"
+      - './entrypoint.sh:/entrypoint.sh'
     entrypoint: /bin/bash
   cryptomator-webdav-env:
     <<: *base
