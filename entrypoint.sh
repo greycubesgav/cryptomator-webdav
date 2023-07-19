@@ -9,6 +9,18 @@ sleep_with_dots() {
   done
 }
 
+cleanup() {
+    echo "Received signal: $1"
+    if [[ -n $CRYPTOMATOR_PID ]]; then
+        echo "Cleaning up cryptomator-cli (PID: $CRYPTOMATOR_PID)"
+        kill "$CRYPTOMATOR_PID"
+    fi
+    exit 0
+}
+
+# Trap signals to call the cleanup function
+trap 'cleanup SIG$1' SIG*
+
 #------------------------------------------------------------------------------------------------------------------------------
 # Header
 #------------------------------------------------------------------------------------------------------------------------------
@@ -77,7 +89,7 @@ java -XX:-UsePerfData -jar '/usr/local/bin/cryptomator-cli.jar' --bind='127.0.0.
     --vault "vault=/vault"  \
     --passwordfile "vault=${CRYPTOMATOR_INTERNAL_PASSFILE_LOC}" &
 CRYPTOMATOR_PID=$!
-
+echo "cryptomator-cli PID: ${CRYPTOMATOR_PID}"
 
 # If we were not given a CRYPTOMATOR_VAULT_PASSFILE, we clean up our temporary file
 if [[ "$CRYPTOMATOR_PASSFILE" == 0 ]]; then
@@ -90,4 +102,4 @@ fi
 # Start stunnel to wrap the cryptomator-cli webdav in a TLS tunnel and export on container lan ip
 echo "Starting stunnel, TLS tunneling 127.0.0.1:8080 => 0.0.0.0:8443"
 echo '#----------------------------------------------------------------------------------------'
-exec /usr/local/bin/stunnel
+/usr/local/bin/stunnel
