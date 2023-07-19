@@ -1,11 +1,12 @@
+# shellcheck disable=SC2148,SC2034
 # CRYPTOMATOR_VAULT_SRC_PATH: The location of the local, encrypted Cryptomator files
 CRYPTOMATOR_VAULT_SRC_PATH='/location/of/local/cryptomator/vaule/files'
 
-# CRYPTOMATOR_VAULT_NAME: The path that will be added to the webdav share e.g. demovault would be shared at http://localhost:18081/demovault
-CRYPTOMATOR_VAULT_NAME=vault
-
 # CRYPTOMATOR_VAULT_PASS: The cryptomator password to unencrypt the vault
 CRYPTOMATOR_VAULT_PASS='password'
+# Or CRYPTOMATOR_VAULT_PASSFILE: The path to a local password file
+CRYPTOMATOR_VAULT_PASSFILE='./vault.pass'
+# Note: CRYPTOMATOR_VAULT_PASSFILE takes precidence
 
-# CRYPTOMATOR_PORT: The port the webdav share will be shared on
+# CRYPTOMATOR_PORT: The port the webdav share will be shared on outside the container, used in docker-compose when running the container
 CRYPTOMATOR_PORT=18081
