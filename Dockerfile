@@ -26,7 +26,6 @@ FROM eclipse-temurin:17.0.7_7-jre-ubi9-minimal
 # Copy stunnel binary from the builder stage
 COPY --from=builder /usr/local/bin/stunnel /usr/local/bin/stunnel
 
-ENV CRYPTOMATOR_VAULT_NAME='vault'
 ENV CRYPTOMATOR_SRC_PATH='/path/to/cryptomator/vault/files'
 ENV CRYPTOMATOR_VAULT_PASS='password'
 ENV CRYPTOMATOR_UID='1000'
@@ -37,12 +36,12 @@ EXPOSE 8443
 # Createa  local cryptomator user and group to keep files contained to local user
 RUN groupadd -g "${CRYPTOMATOR_GID}" cryptomator && useradd --no-log-init -u "${CRYPTOMATOR_UID}" -g cryptomator cryptomator
 
-COPY --chown=cryptomator:cryptomator --chmod=0440 packages/cryptomator-cli-latest.jar /usr/local/bin/cryptomator-cli.jar
-COPY --chown=cryptomator:cryptomator --chmod=0440 config/stunnel.conf /usr/local/etc/stunnel/stunnel.conf
-COPY --from=builder --chown=cryptomator:cryptomator --chmod=0440 /root/stunnel.pem /usr/local/etc/stunnel/stunnel.pem
+COPY --chown=cryptomator:cryptomator --chmod=0444 packages/cryptomator-cli-latest.jar /usr/local/bin/cryptomator-cli.jar
+COPY --chown=cryptomator:cryptomator --chmod=0444 config/stunnel.conf /usr/local/etc/stunnel/stunnel.conf
+COPY --from=builder --chown=cryptomator:cryptomator --chmod=0444 /root/stunnel.pem /usr/local/etc/stunnel/stunnel.pem
 
 # Copy over the main entrypoint script last (to speed up rebuilds)
-COPY --chown=cryptomator:cryptomator --chmod=0550 entrypoint.sh /entrypoint.sh
+COPY --chown=cryptomator:cryptomator --chmod=0555 entrypoint.sh /entrypoint.sh
 
 USER cryptomator
 
