@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1072
+# shellcheck disable=SC1072,SC2120
 
 sleep_with_dots() {
   local seconds=$1
@@ -15,11 +15,17 @@ cleanup() {
         echo "Cleaning up cryptomator-cli (PID: $CRYPTOMATOR_PID)"
         kill "$CRYPTOMATOR_PID"
     fi
+    if [[ -n $STUNNEL_PID ]]; then
+        echo "Cleaning up stunnel (PID: $STUNNEL_PID)"
+        kill "$STUNNEL_PID"
+    fi
     exit 0
 }
 
 # Trap signals to call the cleanup function
-trap 'cleanup SIG$1' SIG*
+trap 'cleanup SIGTERM' SIGTERM
+trap 'cleanup SIGHUP' SIGHUP
+trap 'cleanup SIGINT' SIGINT
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Header
@@ -102,4 +108,10 @@ fi
 # Start stunnel to wrap the cryptomator-cli webdav in a TLS tunnel and export on container lan ip
 echo "Starting stunnel, TLS tunneling 127.0.0.1:8080 => 0.0.0.0:8443"
 echo '#----------------------------------------------------------------------------------------'
-/usr/local/bin/stunnel
+/usr/local/bin/stunnel &
+STUNNEL_PID=$!
+echo "stunnel PID: ${STUNNEL_PID}"
+
+# Wait for the stunnel command to finish, run the cleanup if it dies
+wait $STUNNEL_PID
+cleanup
