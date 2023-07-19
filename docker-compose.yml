@@ -4,13 +4,13 @@ services:
       context: .
       dockerfile: Dockerfile
     image: greycubesgav/cryptomator-webdav
-    user: 1000:1000
+    user: "${CRYPTOMATOR_UID}:${CRYPTOMATOR_GID}"
     environment:
       # Overwrite default variables set in dockerfile with local .env variables
-      CRYPTOMATOR_VAULT_SRC_PATH: "${CRYPTOMATOR_VAULT_SRC_PATH}"
       CRYPTOMATOR_VAULT_PASSFILE: "${CRYPTOMATOR_VAULT_PASSFILE}"
       CRYPTOMATOR_VAULT_PASS: "${CRYPTOMATOR_VAULT_PASS}"
-      CRYPTOMATOR_PORT: "${CRYPTOMATOR_PORT}"
+      CRYPTOMATOR_UID: "${CRYPTOMATOR_UID}"
+      CRYPTOMATOR_GID: "${CRYPTOMATOR_GID}"
     ports:
       - "127.0.0.1:${CRYPTOMATOR_PORT}:8443/tcp"
     volumes:
