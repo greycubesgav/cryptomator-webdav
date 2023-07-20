@@ -35,9 +35,9 @@ C_GREEN='\033[0;32m'
 C_MAGENTA='\033[0;35m'
 C_NC='\033[0m' # No color
 
-UMASK=$(umask)
-UID=$(grep 'Uid' < '/proc/self/status' | awk '{print $2}')
-GID=$(grep 'Gid' < '/proc/self/status' | awk '{print $2}')
+CUR_UMASK=$(umask)
+CUR_UID=$(grep 'Uid' < '/proc/self/status' | awk '{print $2}')
+CUR_GID=$(grep 'Gid' < '/proc/self/status' | awk '{print $2}')
 
 IFS='' read -r -d '' banner <<"EOF"
 #=======================================================================================#
@@ -53,7 +53,7 @@ echo -e "${C_GREEN}#${C_NC} cryptomator-cli listening on                   : ${C
 echo -e "${C_GREEN}#${C_NC} stunnel listening on                           : ${C_MAGENTA}https://0.0.0.0:8443${C_NC}"
 echo -e "${C_GREEN}#${C_NC} TLS secured webdav cryptomator vault access on : ${C_GREEN}webdavs://containerIP:8443/vault${C_NC}"
 echo -e "${C_GREEN}#----------------------------------------------------------------------------------------${C_NC}"
-echo -e "${C_GREEN}#${C_NC} uid: ${C_GREEN}${UID}${C_NC} gid: ${C_GREEN}${GID}${C_NC} umask: ${C_GREEN}${UMASK}${C_NC}"
+echo -e "${C_GREEN}#${C_NC} uid: ${C_GREEN}${CUR_UID}${C_NC} gid: ${C_GREEN}${CUR_GID}${C_NC} umask: ${C_GREEN}${CUR_UMASK}${C_NC}"
 echo -e "${C_GREEN}#----------------------------------------------------------------------------------------${C_NC}"
 
 #------------------------------------------------------------------------------------------------------------------------------
