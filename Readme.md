@@ -1,6 +1,6 @@
 # Cryptomator-webdav Docker File
 This repo contains a set of docker files to create a docker image to run the [Cryptomator cli](https://github.com/cryptomator/cli) within Docker.
-The Cryptomator-cli application shares a local Cryptmator vault over an (unencrypted) webdav share.
+The Cryptomator-cli application shares a local Cryptmator vault over an TLS protected webdav share.
 
 :warning: The webdav server contained within the Cryptomator-cli application provides **no username or password** access controls. Take your own appropriate security precautions.
 
