@@ -1,0 +1,70 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+
+        {
+            "name": "cryptomator-webdav-dev-passfile build",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "docker-compose build cryptomator-webdav-dev-passfile"
+        },
+        {
+            "name": "cryptomator-webdav-dev-passfile run",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "docker-compose run --service-ports cryptomator-webdav-dev-passfile"
+        },
+        {
+            "name": "cryptomator-webdav-dev build",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "docker-compose build cryptomator-webdav-dev"
+        },
+        {
+            "name": "cryptomator-webdav-dev run",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "docker-compose run --service-ports cryptomator-webdav-dev"
+        },
+        {
+            "name": "cryptomator-webdav build all",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "docker-compose build"
+        },
+        {
+            "name": "cryptomator-webdav build",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "docker-compose build cryptomator-webdav"
+        },
+        {
+            "name": "cryptomator-webdav up",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "docker-compose up cryptomator-webdav --remove-orphans"
+        },
+        {
+            "name": "cryptomator-webdav-passfile build",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "docker-compose build cryptomator-webdav-passfile"
+        },
+        {
+            "name": "cryptomator-webdav-passfile up",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "docker-compose up cryptomator-webdav-passfile --remove-orphans"
+        },
+        {
+            "name": "cryptomator-webdav-passfile up detach; view logs",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "docker-compose up --detach cryptomator-webdav-passfile --remove-orphans && docker-compose logs -f greycubesgavcryptomator-webdav-cryptomator-webdav-passfile-1"
+        }
+    ]
+}
