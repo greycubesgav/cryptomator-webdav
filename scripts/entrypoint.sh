@@ -27,33 +27,16 @@ trap 'cleanup SIGTERM' SIGTERM
 trap 'cleanup SIGHUP' SIGHUP
 trap 'cleanup SIGINT' SIGINT
 
-#------------------------------------------------------------------------------------------------------------------------------
-# Header
-#------------------------------------------------------------------------------------------------------------------------------
-# Define color variables
-C_GREEN='\033[0;32m'
-C_MAGENTA='\033[0;35m'
-C_NC='\033[0m' # No color
-
 CUR_UMASK=$(umask)
-CUR_UID=$(grep 'Uid' < '/proc/self/status' | awk '{print $2}')
-CUR_GID=$(grep 'Gid' < '/proc/self/status' | awk '{print $2}')
+CUR_UID=$(setpriv -d | grep '^uid' | awk '{print $2}')
+CUR_GID=$(setpriv -d | grep '^gid' | awk '{print $2}')
 
-IFS='' read -r -d '' banner <<"EOF"
-#=======================================================================================#
-#                   _                  _                          _        _            #
-#  __ _ _ _  _ _ __| |_ ___ _ __  __ _| |_ ___ _ _ _____ __ _____| |__  __| |__ ___ __  #
-# / _| '_| || | '_ \  _/ _ \ '  \/ _` |  _/ _ \ '_|___\ V  V / -_) '_ \/ _` / _` \ V /  #
-# \__|_|  \_, | .__/\__\___/_|_|_\__,_|\__\___/_|      \_/\_/\___|_.__/\__,_\__,_|\_/   #
-#         |__/|_|                                                                       #
-#---------------------------------------------------------------------------------------#
-EOF
-echo -en "${C_GREEN}${banner}${C_NC}"
+echo -e "${C_GREEN}#----------------------------------------------------------------------------------------${C_NC}"
+echo -e "${C_GREEN}#${C_NC} uid: ${C_GREEN}${CUR_UID}${C_NC} gid: ${C_GREEN}${CUR_GID}${C_NC} umask: ${C_GREEN}${CUR_UMASK}${C_NC}"
+echo -e "${C_GREEN}#----------------------------------------------------------------------------------------${C_NC}"
 echo -e "${C_GREEN}#${C_NC} cryptomator-cli listening on                   : ${C_MAGENTA}webdav://127.0.0.1:8080${C_NC}"
 echo -e "${C_GREEN}#${C_NC} stunnel listening on                           : ${C_MAGENTA}https://0.0.0.0:8443${C_NC}"
 echo -e "${C_GREEN}#${C_NC} TLS secured webdav cryptomator vault access on : ${C_GREEN}webdavs://containerIP:8443/vault${C_NC}"
-echo -e "${C_GREEN}#----------------------------------------------------------------------------------------${C_NC}"
-echo -e "${C_GREEN}#${C_NC} uid: ${C_GREEN}${CUR_UID}${C_NC} gid: ${C_GREEN}${CUR_GID}${C_NC} umask: ${C_GREEN}${CUR_UMASK}${C_NC}"
 echo -e "${C_GREEN}#----------------------------------------------------------------------------------------${C_NC}"
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -65,7 +48,7 @@ CRYPTOMATOR_VAULT_PASSFILE='/vault.pass'
 if [[ -f "${CRYPTOMATOR_VAULT_PASSFILE}" ]]; then
     if [[ ! -r "${CRYPTOMATOR_VAULT_PASSFILE}" ]]; then
         echo "Error: ${CRYPTOMATOR_VAULT_PASSFILE} is mounted but is not readable:" >&2
-        echo "Error: Attempting to stat file..." >&2
+        echo "Error: Attempting to stat file for debug purposes..." >&2
         stat "${CRYPTOMATOR_VAULT_PASSFILE}" >&2
         echo "Exiting...."
         exit 1

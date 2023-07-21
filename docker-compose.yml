@@ -4,13 +4,14 @@ services:
       context: .
       dockerfile: Dockerfile
     image: greycubesgav/cryptomator-webdav
-    user: "${CRYPTOMATOR_UID}:${CRYPTOMATOR_GID}"
+    #user: "${CRYPTOMATOR_UID}:${CRYPTOMATOR_GID}"
     environment:
       # Overwrite default variables set in dockerfile with local .env variables
       CRYPTOMATOR_VAULT_PASSFILE: "${CRYPTOMATOR_VAULT_PASSFILE}"
       CRYPTOMATOR_VAULT_PASS: "${CRYPTOMATOR_VAULT_PASS}"
       CRYPTOMATOR_UID: "${CRYPTOMATOR_UID}"
       CRYPTOMATOR_GID: "${CRYPTOMATOR_GID}"
+      CRYPTOMATOR_UMASK: "${CRYPTOMATOR_UMASK}"
     ports:
       - "127.0.0.1:${CRYPTOMATOR_PORT}:8443/tcp"
     volumes:
@@ -29,7 +30,8 @@ services:
     volumes:
       - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault"
       - "${CRYPTOMATOR_VAULT_PASSFILE}:/vault.pass"
-      - './entrypoint.sh:/entrypoint.sh'
+      - './scripts/entrypoint.sh:/entrypoint.sh'
+      - './scripts/init.sh:/init.sh'
     entrypoint: /bin/bash
   cryptomator-webdav-env:
     <<: *base

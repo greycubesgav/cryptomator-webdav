@@ -30,6 +30,7 @@ ENV CRYPTOMATOR_SRC_PATH='/path/to/cryptomator/vault/files'
 ENV CRYPTOMATOR_VAULT_PASS='password'
 ENV CRYPTOMATOR_UID='1000'
 ENV CRYPTOMATOR_GID='1000'
+ENV CRYPTOMATOR_UMASK='0077'
 
 EXPOSE 8443
 
@@ -40,9 +41,8 @@ COPY --chown=cryptomator:cryptomator --chmod=0444 packages/cryptomator-cli-lates
 COPY --chown=cryptomator:cryptomator --chmod=0444 config/stunnel.conf /usr/local/etc/stunnel/stunnel.conf
 COPY --from=builder --chown=cryptomator:cryptomator --chmod=0444 /root/stunnel.pem /usr/local/etc/stunnel/stunnel.pem
 
-# Copy over the main entrypoint script last (to speed up rebuilds)
-COPY --chown=cryptomator:cryptomator --chmod=0555 entrypoint.sh /entrypoint.sh
+# Copy over the init scripts last (to speed up dev rebuilds when these change)
+COPY --chown=root:root --chmod=0555 scripts/init.sh /init.sh
+COPY --chown=cryptomator:cryptomator --chmod=0555 scripts/entrypoint.sh /entrypoint.sh
 
-USER cryptomator
-
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/init.sh"]
