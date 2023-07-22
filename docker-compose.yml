@@ -4,35 +4,41 @@ services:
       context: .
       dockerfile: Dockerfile
     image: greycubesgav/cryptomator-webdav
-    #user: "${CRYPTOMATOR_UID}:${CRYPTOMATOR_GID}"
-    environment:
-      # Overwrite default variables set in dockerfile with local .env variables
-      CRYPTOMATOR_VAULT_PASSFILE: "${CRYPTOMATOR_VAULT_PASSFILE}"
-      CRYPTOMATOR_VAULT_PASS: "${CRYPTOMATOR_VAULT_PASS}"
-      CRYPTOMATOR_UID: "${CRYPTOMATOR_UID}"
-      CRYPTOMATOR_GID: "${CRYPTOMATOR_GID}"
-      CRYPTOMATOR_UMASK: "${CRYPTOMATOR_UMASK}"
+    container_name: cryptomator-webdav
+    env_file:
+      - ./vault.env
     ports:
+      # Bind to the internal interface of the host
+      # Change me to remove '127.0.0.1:' to access the webdav share on the host's local network.
       - "127.0.0.1:${CRYPTOMATOR_PORT}:8443/tcp"
     volumes:
-      - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault"
-  cryptomator-webdav-passfile: &basepassfile
+      - /etc/localtime:/etc/localtime:ro
+      - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault:rw"
+  cryptomator-webdav-passfile:
     # Adds passfile mount to container
     <<: *base
     volumes:
-      - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault"
-      - "${CRYPTOMATOR_VAULT_PASSFILE}:/vault.pass"
+      - /etc/localtime:/etc/localtime:ro
+      - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault:rw"
+      - "${CRYPTOMATOR_VAULT_PASSFILE}:/vault.pass:ro"
   cryptomator-webdav-dev: &dev
+    # Used for local login and debugging of init scripts
     <<: *base
-    entrypoint: /bin/bash
-  cryptomator-webdav-dev-passfile:
-    <<: *basepassfile
     volumes:
-      - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault"
-      - "${CRYPTOMATOR_VAULT_PASSFILE}:/vault.pass"
-      - './scripts/entrypoint.sh:/entrypoint.sh'
-      - './scripts/init.sh:/init.sh'
-    entrypoint: /bin/bash
+      - /etc/localtime:/etc/localtime:ro
+      - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault:rw"
+      - './scripts/entrypoint.sh:/entrypoint.sh:ro'
+      - './scripts/init.sh:/init.sh:ro'
+    entrypoint: /usr/bin/env sh
+  cryptomator-webdav-passfile-dev:
+    # Adds passfile mount to dev container
+    <<: *dev
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault:rw"
+      - "${CRYPTOMATOR_VAULT_PASSFILE}:/vault.pass:ro"
+      - './scripts/entrypoint.sh:/entrypoint.sh:ro'
+      - './scripts/init.sh:/init.sh:ro'
   cryptomator-webdav-env:
     <<: *base
-    entrypoint: /bin/bash -c 'export | grep CRYPTOMATOR_'
+    entrypoint: /usr/bin/env sh -c 'export | grep CRYPTOMATOR_'
