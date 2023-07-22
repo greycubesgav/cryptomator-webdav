@@ -1,3 +1,4 @@
+version: '3'
 services:
   cryptomator-webdav: &base
     build:
@@ -5,12 +6,9 @@ services:
       dockerfile: Dockerfile
     image: greycubesgav/cryptomator-webdav
     container_name: cryptomator-webdav
-    env_file:
-      - ./vault.env
     ports:
       # Bind to the internal interface of the host
-      # Change me to remove '127.0.0.1:' to access the webdav share on the host's local network.
-      - "127.0.0.1:${CRYPTOMATOR_PORT}:8443/tcp"
+      - "${CRYPTOMATOR_HOST}:${CRYPTOMATOR_PORT}:8443/tcp"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault:rw"
