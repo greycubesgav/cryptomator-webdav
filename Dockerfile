@@ -1,18 +1,10 @@
 #------------------------------------------------------------------------------------------
 # Stage 1: Build container
 #------------------------------------------------------------------------------------------
-FROM redhat/ubi9 as builder
+FROM alpine:3.18.2 as builder
 
-# Install build dependencies
-RUN yum install -y gcc make openssl-devel
-
-# Download and build stunnel
-RUN curl -LO https://www.stunnel.org/downloads/stunnel-5.70.tar.gz \
-    && tar -xzf stunnel-5.70.tar.gz \
-    && cd stunnel-5.70 \
-    && ./configure \
-    && make \
-    && make install
+# Install ssl dependencies
+RUN apk --no-cache add openssl
 
 # Create a new selfsigned certificate
 COPY config/pem.conf /root/pem.conf
@@ -21,28 +13,32 @@ RUN openssl req -newkey rsa:2048 -nodes -keyout /root/stunnel.pem -x509 -days 36
 #------------------------------------------------------------------------------------------
 # Stage 2: Final container
 #------------------------------------------------------------------------------------------
-FROM eclipse-temurin:17.0.7_7-jre-ubi9-minimal
+FROM alpine:3.18.2
 
-# Copy stunnel binary from the builder stage
-COPY --from=builder /usr/local/bin/stunnel /usr/local/bin/stunnel
+RUN apk --no-cache add stunnel openjdk17-jre-headless setpriv shadow
 
-ENV CRYPTOMATOR_SRC_PATH='/path/to/cryptomator/vault/files'
-ENV CRYPTOMATOR_VAULT_PASS='password'
-ENV CRYPTOMATOR_UID='1000'
-ENV CRYPTOMATOR_GID='1000'
-ENV CRYPTOMATOR_UMASK='0077'
+# Set temporary UID and GID's to create the initial user and group
+# Use the 'standard' linux starting UID and GID for interactive users
+# These will be updated by the init.sh script to match the user given values when the container is started
+ENV CRYPTOMATOR_TMP_UID='1000'
+ENV CRYPTOMATOR_TMP_GID='1000'
 
+# Expose the final stunnel port
 EXPOSE 8443
 
-# Createa  local cryptomator user and group to keep files contained to local user
-RUN groupadd -g "${CRYPTOMATOR_GID}" cryptomator && useradd --no-log-init -u "${CRYPTOMATOR_UID}" -g cryptomator cryptomator
+# Create a local cryptomator user and group to keep files contained to local user
+RUN groupadd -g "${CRYPTOMATOR_TMP_GID}" cryptomator && useradd --no-log-init -u "${CRYPTOMATOR_TMP_UID}" -g cryptomator cryptomator
 
+# Copy over the stunnel config and self signed cert
+COPY --chown=cryptomator:cryptomator --chmod=0444 config/stunnel.conf /etc/stunnel/stunnel.conf
+COPY --from=builder --chown=cryptomator:cryptomator --chmod=0440 /root/stunnel.pem /etc/stunnel/stunnel.pem
+
+# Copy over the latest cryptomator-cli.jar file
 COPY --chown=cryptomator:cryptomator --chmod=0444 packages/cryptomator-cli-latest.jar /usr/local/bin/cryptomator-cli.jar
-COPY --chown=cryptomator:cryptomator --chmod=0444 config/stunnel.conf /usr/local/etc/stunnel/stunnel.conf
-COPY --from=builder --chown=cryptomator:cryptomator --chmod=0444 /root/stunnel.pem /usr/local/etc/stunnel/stunnel.pem
 
 # Copy over the init scripts last (to speed up dev rebuilds when these change)
 COPY --chown=root:root --chmod=0555 scripts/init.sh /init.sh
 COPY --chown=cryptomator:cryptomator --chmod=0555 scripts/entrypoint.sh /entrypoint.sh
 
+# Set the entrypoint as the initial init.sh script, wil be run as root to allow drop privileges to provide UID and GID
 ENTRYPOINT ["/init.sh"]
