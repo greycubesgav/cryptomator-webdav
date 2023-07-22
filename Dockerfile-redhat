@@ -24,9 +24,9 @@ RUN openssl req -newkey rsa:2048 -nodes -keyout /root/stunnel.pem -x509 -days 36
 FROM eclipse-temurin:17.0.7_7-jre-ubi9-minimal
 
 # Copy stunnel binary from the builder stage
-COPY --from=builder /usr/local/bin/stunnel /usr/local/bin/stunnel
+COPY --from=builder /usr/local/bin/stunnel /usr/bin/stunnel
 
-ENV CRYPTOMATOR_SRC_PATH='/path/to/cryptomator/vault/files'
+#ENV CRYPTOMATOR_SRC_PATH='/path/to/cryptomator/vault/files'
 ENV CRYPTOMATOR_VAULT_PASS='password'
 ENV CRYPTOMATOR_UID='1000'
 ENV CRYPTOMATOR_GID='1000'
@@ -38,8 +38,8 @@ EXPOSE 8443
 RUN groupadd -g "${CRYPTOMATOR_GID}" cryptomator && useradd --no-log-init -u "${CRYPTOMATOR_UID}" -g cryptomator cryptomator
 
 COPY --chown=cryptomator:cryptomator --chmod=0444 packages/cryptomator-cli-latest.jar /usr/local/bin/cryptomator-cli.jar
-COPY --chown=cryptomator:cryptomator --chmod=0444 config/stunnel.conf /usr/local/etc/stunnel/stunnel.conf
-COPY --from=builder --chown=cryptomator:cryptomator --chmod=0444 /root/stunnel.pem /usr/local/etc/stunnel/stunnel.pem
+COPY --chown=cryptomator:cryptomator --chmod=0444 config/stunnel.conf /etc/stunnel/stunnel.conf
+COPY --from=builder --chown=cryptomator:cryptomator --chmod=0444 /root/stunnel.pem /etc/stunnel/stunnel.pem
 
 # Copy over the init scripts last (to speed up dev rebuilds when these change)
 COPY --chown=root:root --chmod=0555 scripts/init.sh /init.sh
