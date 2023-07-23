@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
     image: greycubesgav/cryptomator-webdav
     container_name: cryptomator-webdav
+    env_file:
+      - .env
     ports:
       # Bind to the internal interface of the host
       - "${CRYPTOMATOR_HOST}:${CRYPTOMATOR_PORT}:8443/tcp"
