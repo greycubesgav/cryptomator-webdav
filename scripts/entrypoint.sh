@@ -5,10 +5,10 @@
 sleep_with_dots() {
   msg="$1"
   seconds="$2"
-  i=0
-  while [ "$i" -lt "$seconds" ]; do
+  i=1
+  while [ "$i" -le "$seconds" ]; do
     sleep 1
-    echo "${msg}$((i + 1))"
+    echo "${msg}${i}/${seconds}"
     i=$((i + 1))
   done
 }
@@ -66,7 +66,7 @@ if [ -f "${CRYPTOMATOR_VAULT_PASSFILE}" ]; then
     CRYPTOMATOR_INTERNAL_PASSFILE_LOC="$CRYPTOMATOR_VAULT_PASSFILE"
 else
     # We've not been given a password file so assume we were given one in the environment variables
-    echo "Using password provided in environment variable ${CRYPTOMATOR_VAULT_PASS}"
+    echo "Using password provided in environment variable"
     CRYPTOMATOR_INTERNAL_PASSFILE_LOC='/dev/shm/cryptomator_vault_pass'
     echo "Creating CRYPTOMATOR_INTERNAL_PASSFILE_LOC file at $CRYPTOMATOR_INTERNAL_PASSFILE_LOC"
     install -o cryptomator -g cryptomator -m 0600 /dev/null "${CRYPTOMATOR_INTERNAL_PASSFILE_LOC}"

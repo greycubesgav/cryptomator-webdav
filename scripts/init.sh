@@ -18,14 +18,13 @@ trap 'cleanup SIGINT' INT
 
 CRYPTOMATOR_USER='cryptomator'
 
-
-
 #------------------------------------------------------------------------------------------------------------------------------
 # Header
 #------------------------------------------------------------------------------------------------------------------------------
 # Define color variables
 export C_GREEN='\033[0;32m'
 export C_MAGENTA='\033[0;35m'
+export C_RED='\033[0;31m'
 export C_NC='\033[0m' # No color
 
 printf "${C_GREEN}#=======================================================================================#${C_NC}\n"
@@ -39,6 +38,11 @@ printf "${C_GREEN}#-------------------------------------------------------------
 if [ -n "${CRYPTOMATOR_UID}" ]; then
     printf "${C_GREEN}#${C_MAGENTA} Updating user ${CRYPTOMATOR_USER} UID to match env supplied UID (${C_GREEN}${CRYPTOMATOR_UID}${C_MAGENTA})...${C_NC}\n"
     usermod --uid "${CRYPTOMATOR_UID}" "${CRYPTOMATOR_USER}" | grep -v 'usermod: no changes'
+    printf "${C_GREEN}#${C_MAGENTA} Changing ownership of stunnel config so ${CRYPTOMATOR_UID} can read (${C_GREEN}/etc/stunnel${C_MAGENTA})...${C_NC}\n"
+    chown -R "${CRYPTOMATOR_UID}:" /etc/stunnel
+else
+    printf "${C_GREEN}#${C_RED} No CRYPTOMATOR_UID supplied, required to drop privileges, exiting...${C_NC}\n"
+    exit 11
 fi
 
 if [ -n "${CRYPTOMATOR_GID}" ]; then
@@ -46,6 +50,9 @@ if [ -n "${CRYPTOMATOR_GID}" ]; then
     groupmod --gid "${CRYPTOMATOR_GID}" "${CRYPTOMATOR_USER}"
     printf "${C_GREEN}#${C_MAGENTA} Updating user ${CRYPTOMATOR_USER}'s default group to match env supplied GID (${C_GREEN}${CRYPTOMATOR_GID}${C_MAGENTA})...${C_NC}\n"
     usermod --gid "${CRYPTOMATOR_GID}" "${CRYPTOMATOR_USER}" | grep -v 'usermod: no changes'
+else
+    printf "${C_GREEN}#${C_RED} No CRYPTOMATOR_GID supplied, required to drop privileges, exiting...${C_NC}\n"
+    exit 12
 fi
 
 if [ -n "${CRYPTOMATOR_UMASK}" ]; then
