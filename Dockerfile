@@ -30,7 +30,7 @@ EXPOSE 8443
 RUN groupadd -g "${CRYPTOMATOR_TMP_GID}" cryptomator && useradd --no-log-init -u "${CRYPTOMATOR_TMP_UID}" -g cryptomator cryptomator
 
 # Copy over the stunnel config and self signed cert
-COPY --chown=cryptomator:cryptomator --chmod=0444 config/stunnel.conf /etc/stunnel/stunnel.conf
+COPY --chown=cryptomator:cryptomator --chmod=0440 config/stunnel.conf /etc/stunnel/stunnel.conf
 COPY --from=builder --chown=cryptomator:cryptomator --chmod=0440 /root/stunnel.pem /etc/stunnel/stunnel.pem
 
 # Copy over the latest cryptomator-cli.jar file
