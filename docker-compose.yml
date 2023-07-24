@@ -29,6 +29,8 @@ services:
       - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault:rw"
       - './scripts/entrypoint.sh:/entrypoint.sh:ro'
       - './scripts/init.sh:/init.sh:ro'
+      - './config/stunnel.conf:/etc/stunnel/stunnel.conf:ro'
+      - './config/stunnel.pem:/etc/stunnel/stunnel.pem:ro'
     entrypoint: /usr/bin/env sh
   cryptomator-webdav-passfile-dev:
     # Adds passfile mount to dev container
