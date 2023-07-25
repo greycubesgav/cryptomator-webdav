@@ -13,7 +13,12 @@ services:
       - "${CRYPTOMATOR_HOST}:${CRYPTOMATOR_PORT}:8443/tcp"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - "${CRYPTOMATOR_VAULT_SRC_PATH}:/vault:rw"
+      - type: bind
+        source: ${CRYPTOMATOR_VAULT_SRC_PATH}
+        target: /vault
+        read_only: false
+        bind:
+          create_host_path: false
   cryptomator-webdav-passfile:
     # Adds passfile mount to container
     <<: *base
