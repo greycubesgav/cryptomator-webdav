@@ -2,20 +2,19 @@
 all:
 	@echo "Default target"
 
-
-test-client-cert-success:
-	curl -i --cacert config/stunnel.pem --cert config/stunnel.pem https://127.0.0.1:18081/vault/
-
-test-client-cert-fail:
+test-curl-cacert:
 	curl -i --cacert config/stunnel.pem https://127.0.0.1:18081/vault/
 
-test-rclone-fail:
+test-curl-cacert-clientcert:
+	curl -i --cacert config/stunnel.pem --cert config/stunnel.pem https://127.0.0.1:18081/vault/
+
+test-rclone:
 	rclone ls vault:
 
-test-rclone-cert-fail:
+test-rclone-cacert:
 	rclone --ca-cert config/stunnel.pem ls vault:
 
-test-rclone-cert-pass:
+test-rclone-cacert-clientcert:
 	rclone --ca-cert config/stunnel.pem --client-cert config/stunnel.pem --client-key config/stunnel.pem ls vault:
 
 gen-cert:
@@ -30,11 +29,14 @@ view-pkc-cert:
 convert-cert:
 	openssl pkcs12 -export -legacy -in config/stunnel.pem -inkey config/stunnel.pem -out config/stunnel.p12 -nodes
 
-openssl-remote-cert-fail:
+openssl-remote-connect:
 	openssl s_client -connect 127.0.0.1:18081
 
-openssl-remote-cert-pass:
+openssl-remote-client-cert:
 	openssl s_client -cert config/stunnel.pem -connect 127.0.0.1:18081
 
 run-dev-build:
 	docker-compose run --service-ports cryptomator-webdav-dev
+
+up-cryptomator-webdav:
+	docker-compose up cryptomator-webdav
