@@ -1,5 +1,5 @@
 
-all:
+all: build-cryptomator-webdav
 	@echo "Default target"
 
 test-curl-cacert:
@@ -40,3 +40,6 @@ run-dev-build:
 
 up-cryptomator-webdav:
 	docker-compose up cryptomator-webdav
+
+build-cryptomator-webdav:
+	docker-compose build cryptomator-webdav
