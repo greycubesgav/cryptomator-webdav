@@ -1,4 +1,4 @@
-# Cryptomator-webdav Docker File
+# Cryptomator-webdav
 This repo contains a set of docker files to create a docker image to run the [Cryptomator cli](https://github.com/cryptomator/cli) within Docker.
 The Cryptomator-cli application shares a local Cryptmator vault over an TLS protected webdav share.
 
@@ -6,19 +6,9 @@ The Cryptomator-cli application shares a local Cryptmator vault over an TLS prot
 
 :warning: As of June 2023, Cryptomator states the cli application is still in an early stage and not ready for production use. We recommend using it only for testing and evaluation purposes.
 
-## Docker Image Rebuild Intructions
-
-
-```shell
-# Clone the repo
-git clone git@github.com:greycubesgav/cryptomator-webdav.git
-cd cryptomator-webdav
-# Copy the `sample.env` file to `.env`
-cp sample.env .env
-# Build the docker image using docker-compose
-docker-compose build cryptomator-webdav
-# Image will be built as greycubesgav/cryptomator-webdav
-```
+<p align="center">
+  <img src="images/cryptomator-finder-example.png" alt="Cryptomator Finder Example">
+</p>
 
 ## Usage Instructions
 
@@ -33,13 +23,30 @@ cp sample.env .env
 docker-compose up cryptomator-webdav
 # The vault will be accessible on the docker host machine on the port specified in the .env file
 ```
-By default the cryptomator vault will be available over webdav at `webdavs://127.0.0.1:18081/vault`, with no username or password on the webdav share.
+By default the cryptomator vault will be available over webdav at `webdavs://127.0.0.1:18081/vault`, using a self-signed certificate, with no username or password on the webdav share.
 
 If you wish to be able to access the vault over the the docker host's external IPs, update CRYPTOMATOR_HOST in `.env` to either 0.0.0.0 (all ips), or a specific docker host IP.
+
+#### File Permissions
+
+This docker image is setup to drop privileges to a userID and groupID specified in the Environment Variables. This is to aid running under appliance style OS's such as Unraid, where all containers are run as root by default. Dropping privileges within the container ensures Cryptomator only has access to the userID and groupID specified in the CRYPTOMATOR_UID and CRYPTOMATOR_GID environment variables.
+
+**Ensure that your local Cryptomator vault files are read and writable by the user selected.**
+
+##### Permissions Update
+
+```console
+# Change all files to be owned by userID/groupID 1000
+chown -R 1000:1000 /path/to/cryptomator/vault
+
+# Change all vault files are only readable and writable by the user
+chmod -R u+rwX,g-rwx,o-rwx /path/to/cryptomator/vault
+```
 
 ### Environment variables explanation
 
 ```bash
+# .env file
 # CRYPTOMATOR_VAULT_SRC_PATH: The location of the local, encrypted Cryptomator files
 CRYPTOMATOR_VAULT_SRC_PATH='/location/of/local/cryptomator/vaule/files'
 
@@ -64,6 +71,31 @@ CRYPTOMATOR_GID=1000
 
 # CRYPTOMATOR_UMASK: The umask to create new file as, the default only allows access by owner
 CRYPTOMATOR_UMASK=0077
+```
+
+### Using a signed cert
+If you have a trusted certificate you with to use for the TLS layer, you can bind mount it over the top of the self signed cert within the image.
+
+Add the following line under the Volumes entry within the docker-compose.yml file:
+
+```yml
+   # Volumes:
+      - /path/to/local/signed/cert.pem::/etc/stunnel/stunnel.pem:ro
+```
+
+This will force the internal stunnel TLS wrapper to use your own signed cert in place of it's own self-signed one.
+
+## Docker Image Rebuild Intructions
+
+```shell
+# Clone the repo
+git clone git@github.com:greycubesgav/cryptomator-webdav.git
+cd cryptomator-webdav
+# Copy the `sample.env` file to `.env`
+cp sample.env .env
+# Build the docker image using docker-compose
+docker-compose build cryptomator-webdav
+# Image will be built as greycubesgav/cryptomator-webdav
 ```
 
 ## Upgrade version of internal cryptomator-cli instructions
