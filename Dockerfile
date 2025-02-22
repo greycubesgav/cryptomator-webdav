@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------------------
 # Stage 1: Build container
 #------------------------------------------------------------------------------------------
-FROM alpine:3.18.2 as builder
+FROM alpine:3.21.3 as builder
 
 # Install ssl dependencies
 RUN apk --no-cache add openssl
@@ -13,7 +13,7 @@ RUN openssl req -newkey rsa:2048 -nodes -keyout /root/stunnel.pem -x509 -days 36
 #------------------------------------------------------------------------------------------
 # Stage 2: Final container
 #------------------------------------------------------------------------------------------
-FROM alpine:3.18.2
+FROM alpine:3.21.3
 
 RUN apk --no-cache add stunnel openjdk17-jre-headless setpriv shadow
 
