@@ -1,21 +1,25 @@
 #------------------------------------------------------------------------------------------
 # Stage 1: Build container
 #------------------------------------------------------------------------------------------
-FROM alpine:3.18.2 as builder
+FROM debian:sid-20250407-slim AS builder
 
 # Install ssl dependencies
-RUN apk --no-cache add openssl
+RUN apt-get update && apt-get install --no-install-recommends -y openssl unzip && rm -rf /var/lib/apt/lists/*
 
 # Create a new selfsigned certificate
 COPY config/pem.conf /root/pem.conf
 RUN openssl req -newkey rsa:2048 -nodes -keyout /root/stunnel.pem -x509 -days 3650 -out /root/stunnel.pem -config /root/pem.conf
 
+# Copy over cryptomator-cli package and unzip
+COPY packages/cryptomator-cli-latest-linux-x64.zip /opt/cryptomator-cli.zip
+RUN unzip -o /opt/cryptomator-cli.zip -d /opt/cryptomator/ && rm -f /opt/cryptomator-cli.zip
+
 #------------------------------------------------------------------------------------------
 # Stage 2: Final container
 #------------------------------------------------------------------------------------------
-FROM alpine:3.18.2
+FROM debian:sid-20250407-slim
 
-RUN apk --no-cache add stunnel openjdk17-jre-headless setpriv shadow
+RUN apt-get update && apt-get install --no-install-recommends -y stunnel curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
 # Set temporary UID and GID's to create the initial user and group
 # Use the 'standard' linux starting UID and GID for interactive users
@@ -32,9 +36,7 @@ RUN groupadd -g "${CRYPTOMATOR_TMP_GID}" cryptomator && useradd --no-log-init -u
 # Copy over the stunnel config and self signed cert
 COPY --chown=cryptomator:cryptomator --chmod=0440 config/stunnel.conf /etc/stunnel/stunnel.conf
 COPY --from=builder --chown=cryptomator:cryptomator --chmod=0440 /root/stunnel.pem /etc/stunnel/stunnel.pem
-
-# Copy over the latest cryptomator-cli.jar file
-COPY --chown=cryptomator:cryptomator --chmod=0444 packages/cryptomator-cli-latest.jar /usr/local/bin/cryptomator-cli.jar
+COPY --from=builder --chown=cryptomator:cryptomator /opt/cryptomator/ /opt/
 
 # Copy over the init scripts last (to speed up dev rebuilds when these change)
 COPY --chown=root:root --chmod=0555 scripts/init.sh /init.sh

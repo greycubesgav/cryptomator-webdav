@@ -1,4 +1,5 @@
 # Cryptomator-webdav
+
 This repo contains a set of docker files to create a docker image to run the [Cryptomator cli](https://github.com/cryptomator/cli) within Docker.
 The Cryptomator-cli application shares a local Cryptmator vault over an TLS protected webdav share.
 
@@ -6,9 +7,7 @@ The Cryptomator-cli application shares a local Cryptmator vault over an TLS prot
 
 :warning: As of June 2023, Cryptomator states the cli application is still in an early stage and not ready for production use. We recommend using it only for testing and evaluation purposes.
 
-<p align="center">
-  <img src="images/cryptomator-finder-example.png" alt="Cryptomator Finder Example">
-</p>
+![Cryptomator Finder Example](images/cryptomator-finder-example.png)
 
 ## Usage Instructions
 
@@ -23,17 +22,24 @@ cp sample.env .env
 docker-compose up cryptomator-webdav
 # The vault will be accessible on the docker host machine on the port specified in the .env file
 ```
-By default the cryptomator vault will be available over webdav at `webdavs://127.0.0.1:18081/vault`, using a self-signed certificate, with no username or password on the webdav share.
+
+By default the cryptomator vault will be available over webdav at the following url, using a self-signed certificate, with no username or password on the webdav share.
+
+```bash
+webdavs://127.0.0.1:18081/vault
+```
 
 If you wish to be able to access the vault over the the docker host's external IPs, update CRYPTOMATOR_HOST in `.env` to either 0.0.0.0 (all ips), or a specific docker host IP.
 
-#### File Permissions
+### File Permissions
 
 This docker image is setup to drop privileges to a userID and groupID specified in the Environment Variables. This is to aid running under appliance style OS's such as Unraid, where all containers are run as root by default. Dropping privileges within the container ensures Cryptomator only has access to the userID and groupID specified in the CRYPTOMATOR_UID and CRYPTOMATOR_GID environment variables.
 
-**Ensure that your local Cryptomator vault files are read and writable by the user selected.**
+**Ensure that your local Cryptomator vault files are read and writable by the userID  selected.**
 
-##### Permissions Update
+#### Permissions Update
+
+Run the following commands across your local cryptomator vault files to update them for the the default User and Group IDs.
 
 ```console
 # Change all files to be owned by userID/groupID 1000
@@ -74,6 +80,7 @@ CRYPTOMATOR_UMASK=0077
 ```
 
 ### Using a signed cert
+
 If you have a trusted certificate you with to use for the TLS layer, you can bind mount it over the top of the self signed cert within the image.
 
 Add the following line under the Volumes entry within the docker-compose.yml file:
@@ -99,26 +106,36 @@ docker-compose build cryptomator-webdav
 ```
 
 ## Upgrade version of internal cryptomator-cli instructions
+
 To upgrade to a newer version of cryptomator-cli within the docker image:
 
-* Download the new .jar from the [cryptomator-cli releases page](https://github.com/cryptomator/cli/releases)
-* Update the `packages/cryptomator-cli-latest.jar` symlink to point the new jar version
-```bash
-ln -sf cryptomator-cli-0.5.1.jar packages/cryptomator-cli-latest.jar
-```
+* Download and unzip the new release package from the [cryptomator-cli releases page](https://github.com/cryptomator/cli/releases)
 * Rebuild the docker image
+
 ```bash
-docker-compose build cryptomator-webdav
+wget -P packages 'https://github.com/cryptomator/cli/releases/download/0.6.2/cryptomator-cli-0.6.2-linux-x64.zip'
+ln -s -f cryptomator-cli-0.6.2-linux-x64.zip packages/cryptomator-cli-latest-linux-x64.zip
+make build-cryptomator-webdav
 ```
 
 ## Debugging
 
-### Cryptomator Environment Variables
-To check what environment variables are getting set in the container:
-* Run `docker-compose run cryptomator-webdav-env`
+### To check what environment variables are getting set in the container
 
-### To run the docker container using an environment variable password and connect to a local shell
-* Run `docker-compose run --service-ports cryptomator-webdav-dev`
+```bash
+make run-dev-env
+```
 
-### To run the docker container using an password file and connect to a local shell
-* Run `docker-compose run --service-ports cryptomator-webdav-passfile-dev`
+### To run the docker container using an environment variable password, connect to a local shell and manually run the entrypoint script
+
+```bash
+make run-dev-build
+/entrypoint.sh
+```
+
+### To run the docker container using an password file, connect to a local shell and manually run the entrypoint script
+
+```bash
+make run-dev-build-passfile
+/entrypoint.sh
+```

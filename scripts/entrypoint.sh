@@ -1,17 +1,5 @@
 #!/usr/bin/env sh
-##!/usr/bin/env bash
 # shellcheck disable=SC1072,SC2120,SC2059
-
-sleep_with_dots() {
-  msg="$1"
-  seconds="$2"
-  i=1
-  while [ "$i" -le "$seconds" ]; do
-    sleep 1
-    echo "${msg}${i}/${seconds}"
-    i=$((i + 1))
-  done
-}
 
 # Define steps to clean up container parts when exiting
 cleanup() {
@@ -82,34 +70,47 @@ fi
 CRYPTOMATOR_LISTEN_IP='127.0.0.1'
 CRYPTOMATOR_LISTEN_PORT='8080'
 CRYPTOMATOR_INTERNAL_MAX_WAIT_TIME=5
-CRYPTOMATOR_INTERNAL_STARTUP_TIME=5
 
 # Start cryptomator-cli listening on localhost
 echo "Starting cryptomator-cli in background, will share on: webdav://${CRYPTOMATOR_LISTEN_IP}:${CRYPTOMATOR_LISTEN_PORT}/vault/"
 
 # Note: Currenly hardcoded path for alpine java location
-/usr/bin/java -XX:-UsePerfData -jar '/usr/local/bin/cryptomator-cli.jar' --bind="${CRYPTOMATOR_LISTEN_IP}" --port="${CRYPTOMATOR_LISTEN_PORT}" \
-    --vault "vault=/vault"  \
-    --passwordfile "vault=${CRYPTOMATOR_INTERNAL_PASSFILE_LOC}" &
+
+if [ "$CRYPTOMATOR_DEBUG" -eq 1 ]; then
+    printf "cryptomator-cli command: /opt/cryptomator-cli/bin/cryptomator-cli unlock \
+  --mounter=org.cryptomator.frontend.webdav.mount.FallbackMounter \
+  --volumeId='vault' \
+  --loopbackPort=\"${CRYPTOMATOR_LISTEN_PORT}\" \
+  --password:file=\"${CRYPTOMATOR_INTERNAL_PASSFILE_LOC}\" \
+  /vault &"
+fi
+
+/opt/cryptomator-cli/bin/cryptomator-cli unlock \
+  --mounter=org.cryptomator.frontend.webdav.mount.FallbackMounter \
+  --volumeId='vault' \
+  --loopbackPort="${CRYPTOMATOR_LISTEN_PORT}" \
+  --password:file="${CRYPTOMATOR_INTERNAL_PASSFILE_LOC}" \
+  /vault &
+
 CRYPTOMATOR_PID=$!
 echo "cryptomator-cli PID: ${CRYPTOMATOR_PID}"
 
-echo "Waiting for cryptomator-cli to begin..."
-
 start_time=$(date +%s)
 elapsed_time=$(($(date +%s) - start_time))
-max_time="$CRYPTOMATOR_INTERNAL_MAX_WAIT_TIME"
+#max_time="$CRYPTOMATOR_INTERNAL_MAX_WAIT_TIME"
 cryptomator_port_ready=0
+cryptomator_vault_ready=0
 
-while [ $((elapsed_time <= max_time)) -eq 1 ]; do
-    nc -n -z -w 1 "$CRYPTOMATOR_LISTEN_IP" "$CRYPTOMATOR_LISTEN_PORT"
+echo -n "Waiting for cryptomator-cli to begin..."
+# Keep checking if the port is available until the maximum wait time is reached
+while [ $((elapsed_time <= CRYPTOMATOR_INTERNAL_MAX_WAIT_TIME)) -eq 1 ] && [ $cryptomator_port_ready -eq 0 ]; do
+    nc -n -z -w 1 "$CRYPTOMATOR_LISTEN_IP" "$CRYPTOMATOR_LISTEN_PORT"  >/dev/null 2>&1
     ret=$?
-
+    echo -n "."
     if [ $ret -eq 0 ]; then
-        echo "Cryptomator-cli port is now available."
+        echo
+        echo "Cryptomator-cli port is now available on ${CRYPTOMATOR_LISTEN_IP}:${CRYPTOMATOR_LISTEN_PORT}"
         cryptomator_port_ready=1
-        sleep_with_dots "Waiting for cryptomator-cli to setup share " "$CRYPTOMATOR_INTERNAL_STARTUP_TIME"
-        nc -v -n -z -w 1 "$CRYPTOMATOR_LISTEN_IP" "$CRYPTOMATOR_LISTEN_PORT"
         break
     fi
     # Sleep for a brief period before retrying
@@ -117,6 +118,7 @@ while [ $((elapsed_time <= max_time)) -eq 1 ]; do
     elapsed_time=$(($(date +%s) - start_time))
 done
 
+# Whether we succeeded or not we remove the temporary pass file ASAP
 # If we were not given a CRYPTOMATOR_VAULT_PASSFILE clean up our temporary file
 if [ "$CRYPTOMATOR_PASSFILE" = 0 ]; then
     echo "Removing temporary pass file ${CRYPTOMATOR_INTERNAL_PASSFILE_LOC}"
@@ -132,7 +134,38 @@ if [ "$cryptomator_port_ready" -ne 1 ]; then
         echo "Killing...." >&2
         kill $CRYPTOMATOR_PID
     fi
+    echo "Exiting entrypoint.sh!" >&2
     exit 1
+fi
+
+echo -n "Waiting for cryptomator-cli to share the vault..."
+# Keep checking if the share is available until the maximum wait time is reached
+while [ $((elapsed_time <= CRYPTOMATOR_INTERNAL_MAX_WAIT_TIME)) -eq 1 ] && [ $cryptomator_vault_ready -eq 0 ]; do
+    curl --silent --fail --show-error --max-time 1 "http://${CRYPTOMATOR_LISTEN_IP}:${CRYPTOMATOR_LISTEN_PORT}/vault/"  >/dev/null 2>&1
+    ret=$?
+    echo -n "."
+    if [ $ret -eq 0 ]; then
+        echo
+        echo "Cryptomator-cli share is now available."
+        cryptomator_vault_ready=1
+        break
+    fi
+    # Sleep for a brief period before retrying
+    sleep 0.1
+    elapsed_time=$(($(date +%s) - start_time))
+done
+
+# If we have not managed to connect to cryptomator-cli in the allotted time, exit
+if [ "$cryptomator_vault_ready" -ne 1 ]; then
+    echo "Error: cryptomator-cli vault could not be reached after $CRYPTOMATOR_INTERNAL_MAX_WAIT_TIME seconds." >&2
+    echo "Ensuring cryptomator process is not still running in the background.."
+    if [ -f "/proc/${CRYPTOMATOR_PID}/stat" ]; then
+        echo "Error: Cryptomator-cli still running in the background. PID: $CRYPTOMATOR_PID" >&2
+        echo "Killing...." >&2
+        kill $CRYPTOMATOR_PID
+    fi
+    echo "Exiting entrypoint.sh" >&2
+    exit 2
 fi
 
 echo '#-------------------------------------------------------'

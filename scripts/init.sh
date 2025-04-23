@@ -3,7 +3,7 @@
 
 cleanup() {
   echo "Received signal: $1"
-  if [ -n "$CRYPTOMATOR_ENTRYPOINT_PID" ]; then
+  if [ -n "$CRYPTOMATOR_ENTRYPOINT_PID" ] && [ -f "/proc/${CRYPTOMATOR_ENTRYPOINT_PID}/stat" ]; then
     echo "Cleaning up entrypoint.sh (PID: $CRYPTOMATOR_ENTRYPOINT_PID)"
     kill -s TERM "$CRYPTOMATOR_ENTRYPOINT_PID"
   fi
@@ -39,7 +39,7 @@ if [ -n "${CRYPTOMATOR_UID}" ]; then
     printf "${C_GREEN}#${C_MAGENTA} Updating user ${CRYPTOMATOR_USER} UID to match env supplied UID (${C_GREEN}${CRYPTOMATOR_UID}${C_MAGENTA})...${C_NC}\n"
     usermod --uid "${CRYPTOMATOR_UID}" "${CRYPTOMATOR_USER}" | grep -v 'usermod: no changes'
     printf "${C_GREEN}#${C_MAGENTA} Changing ownership of stunnel config so ${C_GREEN}${CRYPTOMATOR_UID}${C_MAGENTA} can read (${C_GREEN}/etc/stunnel${C_MAGENTA})...${C_NC}\n"
-    chown -R "${CRYPTOMATOR_UID}:" /etc/stunnel
+    chown -R "${CRYPTOMATOR_UID}" /etc/stunnel
 else
     printf "${C_GREEN}#${C_RED} No CRYPTOMATOR_UID supplied, required to drop privileges, exiting...${C_NC}\n"
     exit 11

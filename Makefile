@@ -35,11 +35,26 @@ openssl-remote-connect:
 openssl-remote-client-cert:
 	openssl s_client -cert config/stunnel.pem -connect 127.0.0.1:18081
 
+run-dev-env:
+	docker-compose run cryptomator-webdav-env
+
 run-dev-build:
-	docker-compose run --service-ports cryptomator-webdav-dev
+	docker-compose run --rm --remove-orphans --service-ports  cryptomator-webdav-dev
+
+run-dev-build-passfile:
+	docker-compose run  --rm --remove-orphans --service-ports cryptomator-webdav-passfile-dev
 
 up-cryptomator-webdav:
 	docker-compose up cryptomator-webdav
 
 build-cryptomator-webdav:
 	docker-compose build cryptomator-webdav
+
+test-cryptomator-webdav-http:
+	curl -X PROPFIND http://127.0.0.1:8080/vault/ -H "Depth: 1"
+
+test-cryptomator-webdav-https:
+	curl -k -X PROPFIND https://127.0.0.1:8443/vault/ -H "Depth: 1"
+
+test-cryptomator-webdav-https-host:
+	curl -k -X PROPFIND https://127.0.0.1:18081/vault/ -H "Depth: 1"
