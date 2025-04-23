@@ -1,3 +1,4 @@
+VERSION ?= 0.6.2-1
 
 all: build-cryptomator-webdav
 	@echo "Default target"
@@ -58,3 +59,10 @@ test-cryptomator-webdav-https:
 
 test-cryptomator-webdav-https-host:
 	curl -k -X PROPFIND https://127.0.0.1:18081/vault/ -H "Depth: 1"
+
+docker-tag-cryptomator-webdav:
+	docker tag greycubesgav/cryptomator-webdav:latest greycubesgav/cryptomator-webdav:$(VERSION)
+
+docker-push-cryptomator-webdav:
+	docker push greycubesgav/cryptomator-webdav:$(VERSION)
+	docker push greycubesgav/cryptomator-webdav:latest
